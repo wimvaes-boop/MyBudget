@@ -464,6 +464,7 @@ export default function App() {
       {showWizard && (
         <SetupWizard
           onComplete={handleCompleteWizard}
+          onClose={() => setShowWizard(false)}
         />
       )}
 

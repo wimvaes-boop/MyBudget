@@ -6,7 +6,7 @@
     "salaryDay": 25,
     "pinCode": "",
     "pinEnabled": false,
-    "wizardCompleted": false,
+    "wizardCompleted": true,
     "monthlyNetIncome": 2850,
     "mealVoucherMonthly": 160,
     "emergencyFundTargetMonths": 6,

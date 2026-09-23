@@ -1,55 +1,75 @@
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, Check, Shield, Home, Zap, ShieldCheck, CreditCard, Lock } from 'lucide-react';
+import { Sparkles, ArrowRight, Check, Shield, Home, Zap, ShieldCheck, CreditCard, Lock, X } from 'lucide-react';
 import { formatCurrency } from '../services/formatters';
 
-export default function SetupWizard({ onComplete }) {
+export default function SetupWizard({ onComplete, onClose }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    income: 2850,
-    benefits: 160,
-    salaryDay: 25,
+    income: '',
+    benefits: '',
+    salaryDay: '',
     fixedCosts: {
-      exp_housing: 1306.74,
-      exp_energy: 160,
-      exp_insurance: 95,
-      exp_telecom: 75
+      exp_housing: '',
+      exp_energy: '',
+      exp_insurance: '',
+      exp_telecom: ''
     },
-    savingsGoalMonthly: 350,
+    savingsGoalMonthly: '',
     pinCode: ''
   });
 
-  const totalFixed = Object.values(formData.fixedCosts).reduce((a, b) => Number(a) + Number(b), 0);
-  const totalIncome = Number(formData.income) + Number(formData.benefits);
-  const estimatedFree = totalIncome - totalFixed - Number(formData.savingsGoalMonthly);
+  const totalFixed = Object.values(formData.fixedCosts).reduce((a, b) => Number(a || 0) + Number(b || 0), 0);
+  const totalIncome = Number(formData.income || 0) + Number(formData.benefits || 0);
+  const estimatedFree = totalIncome - totalFixed - Number(formData.savingsGoalMonthly || 0);
 
   const handleFixedChange = (id, val) => {
     setFormData(prev => ({
       ...prev,
       fixedCosts: {
         ...prev.fixedCosts,
-        [id]: parseFloat(val) || 0
+        [id]: val
       }
     }));
   };
 
   const handleFinish = () => {
-    onComplete(formData);
+    onComplete({
+      income: Number(formData.income || 0),
+      benefits: Number(formData.benefits || 0),
+      salaryDay: Number(formData.salaryDay || 25),
+      fixedCosts: Object.fromEntries(
+        Object.entries(formData.fixedCosts).map(([k, v]) => [k, Number(v || 0)])
+      ),
+      savingsGoalMonthly: Number(formData.savingsGoalMonthly || 0),
+      pinCode: formData.pinCode
+    });
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto">
         
-        {/* Progress Bar */}
-        <div className="flex items-center gap-1.5 mb-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className={`h-1.5 flex-1 rounded-full transition-all ${
-                step >= i ? 'bg-emerald-500' : 'bg-slate-200'
-              }`}
-            />
-          ))}
+        {/* Progress Bar & Optional Close */}
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-1.5 flex-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-all ${
+                  step >= i ? 'bg-emerald-500' : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              title="Sluiten"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* STEP 1: Introductie */}
@@ -62,11 +82,14 @@ export default function SetupWizard({ onComplete }) {
               Welkom bij MyBudget
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
-              Ik ben jouw persoonlijke financiële adviseur. In 3 korte stappen stellen we jouw profiel in zodat ik direct voor je kan rekenen, waarschuwen en optimaliseren.
+              Ik ben jouw persoonlijke financiële assistent. We beginnen met een schone lei (clean sheet). In 3 korte stappen stellen we jouw cijfers in.
             </p>
             <div className="p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl text-left text-xs text-emerald-800 space-y-1.5">
               <p className="font-semibold flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-emerald-600" /> Alles blijft 100% lokaal op je NUC
+                <Check className="w-4 h-4 text-emerald-600" /> 100% lokaal & privé opgeslagen
+              </p>
+              <p className="font-semibold flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-600" /> Schone lei: vul alleen in wat voor jou van toepassing is
               </p>
               <p className="font-semibold flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-emerald-600" /> Later altijd aanpasbaar in instellingen
@@ -88,7 +111,7 @@ export default function SetupWizard({ onComplete }) {
             <div>
               <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Stap 1 van 3</span>
               <h2 className="text-xl font-bold text-slate-900 mt-0.5">Maandelijkse Inkomsten</h2>
-              <p className="text-xs text-slate-500">Wat komt er elke maand structureel binnen?</p>
+              <p className="text-xs text-slate-500">Wat komt er elke maand structureel binnen? (mag op 0 blijven)</p>
             </div>
 
             <div className="space-y-3">
@@ -98,9 +121,13 @@ export default function SetupWizard({ onComplete }) {
                 </label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.income}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setFormData({ ...formData, income: e.target.value })}
-                  className="w-full text-xl font-bold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500"
+                  className="w-full text-xl font-bold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500 placeholder:text-slate-300"
                 />
               </div>
 
@@ -110,9 +137,13 @@ export default function SetupWizard({ onComplete }) {
                 </label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.benefits}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                  className="w-full text-xl font-bold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500"
+                  className="w-full text-xl font-bold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500 placeholder:text-slate-300"
                 />
               </div>
 
@@ -124,9 +155,11 @@ export default function SetupWizard({ onComplete }) {
                   type="number"
                   min="1"
                   max="31"
+                  placeholder="25"
                   value={formData.salaryDay}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setFormData({ ...formData, salaryDay: e.target.value })}
-                  className="w-full text-base font-semibold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500"
+                  className="w-full text-base font-semibold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500 placeholder:text-slate-300"
                 />
               </div>
             </div>
@@ -155,7 +188,7 @@ export default function SetupWizard({ onComplete }) {
             <div>
               <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Stap 2 van 3</span>
               <h2 className="text-xl font-bold text-slate-900 mt-0.5">Vaste Maandelijkse Kosten</h2>
-              <p className="text-xs text-slate-500">Kosten die elke maand sowieso van je rekening gaan.</p>
+              <p className="text-xs text-slate-500">Kosten die elke maand sowieso van je rekening gaan (mag op 0 blijven).</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -163,9 +196,13 @@ export default function SetupWizard({ onComplete }) {
                 <label className="text-[11px] font-bold text-slate-600 block mb-1">Wonen (Huur/Hypotheek)</label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.fixedCosts.exp_housing}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => handleFixedChange('exp_housing', e.target.value)}
-                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm"
+                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm placeholder:text-slate-300"
                 />
               </div>
 
@@ -173,9 +210,13 @@ export default function SetupWizard({ onComplete }) {
                 <label className="text-[11px] font-bold text-slate-600 block mb-1">Energie (Gas/Stroom)</label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.fixedCosts.exp_energy}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => handleFixedChange('exp_energy', e.target.value)}
-                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm"
+                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm placeholder:text-slate-300"
                 />
               </div>
 
@@ -183,9 +224,13 @@ export default function SetupWizard({ onComplete }) {
                 <label className="text-[11px] font-bold text-slate-600 block mb-1">Verzekeringen</label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.fixedCosts.exp_insurance}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => handleFixedChange('exp_insurance', e.target.value)}
-                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm"
+                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm placeholder:text-slate-300"
                 />
               </div>
 
@@ -193,9 +238,13 @@ export default function SetupWizard({ onComplete }) {
                 <label className="text-[11px] font-bold text-slate-600 block mb-1">Internet & Telecom</label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.fixedCosts.exp_telecom}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => handleFixedChange('exp_telecom', e.target.value)}
-                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm"
+                  className="w-full font-bold text-slate-900 bg-white px-2 py-1.5 border border-slate-200 rounded-lg text-sm placeholder:text-slate-300"
                 />
               </div>
             </div>
@@ -239,9 +288,13 @@ export default function SetupWizard({ onComplete }) {
                 </label>
                 <input
                   type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
                   value={formData.savingsGoalMonthly}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => setFormData({ ...formData, savingsGoalMonthly: e.target.value })}
-                  className="w-full text-lg font-bold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500"
+                  className="w-full text-lg font-bold text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500 placeholder:text-slate-300"
                 />
               </div>
 

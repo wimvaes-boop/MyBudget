@@ -59,7 +59,7 @@ export function analyzeFinancesLocally(state) {
 
   const totalBudgetedIncome = categories
     .filter(c => c.type === 'income')
-    .reduce((sum, c) => sum + (Number(c.budget) || 0), 0) || settings.monthlyNetIncome || 2850;
+    .reduce((sum, c) => sum + (Number(c.budget) || 0), 0) || Number(settings?.monthlyNetIncome) || 0;
 
   const totalBudgetedExpenses = categories
     .filter(c => c.type === 'expense')

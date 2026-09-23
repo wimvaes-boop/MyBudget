@@ -6,8 +6,8 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
   const [pinEnabled, setPinEnabled] = useState(settings?.pinEnabled || false);
   const [pinCode, setPinCode] = useState(settings?.pinCode || '');
   const [salaryDay, setSalaryDay] = useState(settings?.salaryDay || 25);
-  const [monthlyNetIncome, setMonthlyNetIncome] = useState(settings?.monthlyNetIncome || 2850);
-  const [mealVoucherMonthly, setMealVoucherMonthly] = useState(settings?.mealVoucherMonthly || 160);
+  const [monthlyNetIncome, setMonthlyNetIncome] = useState(settings?.monthlyNetIncome ?? 0);
+  const [mealVoucherMonthly, setMealVoucherMonthly] = useState(settings?.mealVoucherMonthly ?? 0);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Category budget edit modal / state
@@ -20,8 +20,8 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
       pinEnabled,
       pinCode: pinEnabled ? pinCode : '',
       salaryDay: parseInt(salaryDay) || 25,
-      monthlyNetIncome: parseFloat(monthlyNetIncome) || 2850,
-      mealVoucherMonthly: parseFloat(mealVoucherMonthly) || 160
+      monthlyNetIncome: parseFloat(monthlyNetIncome) || 0,
+      mealVoucherMonthly: parseFloat(mealVoucherMonthly) || 0
     });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);

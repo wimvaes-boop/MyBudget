@@ -172,32 +172,39 @@ app.post('/api/settings/verify-pin', (req, res) => {
 // Setup Wizard Complete
 app.post('/api/wizard/complete', (req, res) => {
   try {
-    const { income, benefits, fixedCosts, savingsGoal, salaryDay, pinCode } = req.body;
+    const { income, benefits, fixedCosts, savingsGoalMonthly, salaryDay, pinCode } = req.body;
     
     const settings = db.getSettings();
     settings.wizardCompleted = true;
-    if (income) settings.monthlyNetIncome = Number(income);
-    if (salaryDay) settings.salaryDay = Number(salaryDay);
+    if (income !== undefined) settings.monthlyNetIncome = Number(income || 0);
+    if (benefits !== undefined) settings.mealVoucherMonthly = Number(benefits || 0);
+    if (salaryDay !== undefined) settings.salaryDay = Number(salaryDay || 25);
     if (pinCode) {
       settings.pinCode = pinCode;
       settings.pinEnabled = true;
+    } else {
+      settings.pinCode = '';
+      settings.pinEnabled = false;
     }
     db.updateSettings(settings);
 
     // Update category budgets if specified
-    if (income) {
-      db.updateCategory('inc_salary', { budget: Number(income) });
+    if (income !== undefined) {
+      db.updateCategory('inc_salary', { budget: Number(income || 0) });
       const recSalary = db.getRecurring().find(r => r.id === 'rec_salary');
-      if (recSalary) db.updateRecurring('rec_salary', { amount: Number(income) });
+      if (recSalary) db.updateRecurring('rec_salary', { amount: Number(income || 0), dayOfMonth: Number(salaryDay || 25) });
     }
-    if (benefits) {
-      db.updateCategory('inc_meal_vouchers', { budget: Number(benefits) });
+    if (benefits !== undefined) {
+      db.updateCategory('inc_meal_vouchers', { budget: Number(benefits || 0) });
       const recMeal = db.getRecurring().find(r => r.id === 'rec_meals');
-      if (recMeal) db.updateRecurring('rec_meals', { amount: Number(benefits) });
+      if (recMeal) db.updateRecurring('rec_meals', { amount: Number(benefits || 0) });
     }
     if (fixedCosts && typeof fixedCosts === 'object') {
       Object.entries(fixedCosts).forEach(([catId, amount]) => {
-        db.updateCategory(catId, { budget: Number(amount) });
+        const val = Number(amount || 0);
+        db.updateCategory(catId, { budget: val });
+        const rec = db.getRecurring().find(r => r.categoryId === catId);
+        if (rec) db.updateRecurring(rec.id, { amount: val });
       });
     }
 
