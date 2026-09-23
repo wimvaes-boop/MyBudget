@@ -1,7 +1,7 @@
 import React from 'react';
-import { ShieldCheck, Sparkles, RefreshCw, Lock, Smartphone, Wifi } from 'lucide-react';
+import { ShieldCheck, Sparkles, RefreshCw, Lock, Smartphone, Wifi, BookOpen } from 'lucide-react';
 
-export default function Navbar({ advisorData, settings, onLock, onRefresh, isRefreshing }) {
+export default function Navbar({ advisorData, settings, onLock, onRefresh, isRefreshing, onOpenManual }) {
   const healthScore = advisorData?.summary?.healthScore || 80;
 
   // Determine score color badge
@@ -42,12 +42,21 @@ export default function Navbar({ advisorData, settings, onLock, onRefresh, isRef
         </div>
 
         {/* Right Action Icons: Health Score & Lock */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Health Score Pill */}
           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${badge.bg}`}>
             <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
             <span>{healthScore}/100</span>
           </div>
+
+          {/* Handleiding Button */}
+          <button
+            onClick={onOpenManual}
+            className="p-2 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 active:scale-95 transition-all"
+            title="Handleiding & Uitleg"
+          >
+            <BookOpen className="w-4 h-4 text-emerald-600" />
+          </button>
 
           {/* Refresh Button */}
           <button

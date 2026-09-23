@@ -1,61 +1,66 @@
 # 💎 MyBudget (v1.2.0) • Financiële Adviseur & Budget WebApp
 
-Een high-end persoonlijke budgetbeheerder en financieel adviseur, ontworpen om te draaien op je **NUC** thuisserver en te bedienen vanaf je **iPhone** (via Tailscale of lokaal netwerk) én als kaartje/widget op je NUC dashboard.
+Een high-end persoonlijke budgetbeheerder en financieel adviseur, ontworpen om te draaien op je **NUC** thuisserver en te bedienen vanaf je **iPhone** (via Tailscale of lokaal netwerk) én online beschikbaar als standalone WebApp via GitHub Pages.
+
+👉 **Lees hier de complete gebruikershandleiding:** [**HANDLEIDING.md**](HANDLEIDING.md)
 
 ---
 
-## 📱 Kenmerken & Functionaliteiten
+## 🌐 Twee Manieren Om Te Gebruiken
+
+1. **🏠 Privé op je NUC thuisserver:**
+   - Adres: `http://192.168.0.10:3001` (of via Apache reverse-proxy `/budget/`).
+   - Alles synchroniseert automatisch en wordt veilig opgeslagen in een lokaal JSON-bestand op je NUC.
+2. **📱 Standalone Privé via GitHub Pages:**
+   - Adres: [**https://wimvaes-boop.github.io/MyBudget/**](https://wimvaes-boop.github.io/MyBudget/)
+   - Ideaal voor onderweg of om te delen met familie/vrienden.
+   - Start automatisch met een schone lei (clean sheet) en slaat gegevens 100% privé op in de mobiele browser van het toestel.
+
+---
+
+## 📱 Belangrijkste Functies
 
 1. **📷 Automatische Kassaticket Scanner (OCR):**
-   - Maak direct een foto met je mobiele camera of upload een kassabon.
-   - Herkent automatisch het **totaalbedrag**, de **winkel** (bv. Delhaize, Colruyt, Shell, Kruidvat) en de **datum**.
+   - Maak een foto van een kassabonnetje met je mobiele camera.
+   - Herkent automatisch het **totaalbedrag**, de **winkel** (Delhaize, Colruyt, Albert Heijn, Lidl, Kruidvat, Shell, etc.) en de **datum**.
    - Koppelt het ticket automatisch aan de juiste categorie en betaalmethode (inclusief maaltijdcheques).
-   - 100% lokale en private verwerking via on-device OCR (`tesseract.js`).
+   - 100% lokaal en privé op je toestel verwerkt (`tesseract.js`).
 
-2. **High-End Financieel Advies & Rustige Indeling:**
-   - **Logische indeling:** Populaire en dagelijkse uitgaven staan direct bovenaan; vaste maandlasten (zoals hypotheek) rustig onderaan.
-   - **Geen valse alarmen:** Vaste contracten en hypotheek die voldaan zijn worden rustig weergegeven zonder storende gevarenkleuren.
-   - **Variabele Inkomsten:** Volledige ondersteuning voor wisselende inkomsten (verkoop van kunst/tekeningen, opdrachten, workshops) met directe verhoging van je veilige bestedingsruimte.
-   - **Veilig Dagbudget:** Berekent op basis van je vaste lasten en variabele uitgaven hoeveel je dagelijks vrij kunt besteden tot je volgende salaris.
-   - **50 / 30 / 20 Verdeling:** Analyseert of je uitgaven in balans zijn (50% behoeften, 30% plezier/wensen, 20% sparen & beleggen).
-   - **Noodfonds Buffer:** Bewaakt hoeveel maanden vaste lasten gedekt zijn op je direct opvraagbare spaarrekening.
+2. **Duidelijk Dagbudget & Vandaag Uitgegeven:**
+   - **Dagbudget:** Het bedrag dat je vandaag zorgeloos kunt besteden aan wensen en dagelijkse kosten.
+   - **Vandaag uitgegeven:** Toont exact wat je vandaag hebt uitgegeven en wat er nog overschiet van je dagbudget.
+   - **Tempo tot salaris:** Volgt het aantal dagen tot je volgende salarisuitbetaling.
 
-2. **iPhone-First Snelle Invoer (PWA):**
-   - Binnen enkele seconden een uitgave of inkomst invoeren onderweg.
-   - Directe feedback hoeveel budget er nog overblijft in de gekozen categorie.
-   - Groot numeriek invoerveld met snelle `+5`, `+10`, `+20`, `+50` toetsen.
+3. **Logische & Rustige Categorie-Indeling:**
+   - *Dagelijkse & Populaire Uitgaven* (boodschappen, horeca, vervoer) direct bovenaan.
+   - *Vaste Maandlasten* (hypotheek/huur, energie, verzekeringen) rustig onderaan met `✓ Betaald / Voldaan` status zonder storende alarmen.
 
-3. **Licht & Luchtig Design:**
-   - Apple/Fintech look & feel met zachte schaduwen, vloeiende overgangen en lichte kleuren.
-   - Responsief voor zowel kleine iPhone schermen als brede NUC dashboard widgets.
+4. **Variabele Inkomsten:**
+   - Eenvoudig extra inkomsten registreren (verkoop van tekeningen/kunst, opdrachten, workshops, bonussen).
+   - Verhoogt direct je veilige bestedingsruimte voor de rest van de maand.
 
-4. **Veiligheid & Privacy:**
-   - **100% Lokaal:** Alle data wordt veilig opgeslagen in een lokaal JSON-bestand op je NUC.
-   - **Pincode Beveiliging:** Optioneel in te stellen 4-cijferige iOS-stijl pincode.
-   - **Tailscale Ready:** Veilig onderweg bereikbaar zonder open poorten op je router.
-   - **Backups:** Met één klik een complete JSON-backup downloaden of herstellen.
+5. **50 / 30 / 20 Financieel Advies:**
+   - Meet of je uitgaven in balans zijn (50% behoeften, 30% wensen, 20% sparen & beleggen).
+   - Geeft een financiële gezondheidsscore van 0 tot 100.
 
----
-
-## 🚀 Starten op je NUC
-
-### Manier 1: Dubbelklik op het opstartbestand
-Dubbelklik simpelweg op `start.bat` in de projectmap.
-
-### Manier 2: Via Terminal / PowerShell
-```bash
-npm start
-```
-De app start automatisch op: **`http://localhost:3001`** (en op je Tailscale IP, bv. `http://100.x.y.z:3001`).
+6. **Pincode & Data Veiligheid:**
+   - Optionele 4-cijferige pincodebeveiliging in iOS-stijl.
+   - Met 1 klik een complete JSON backup downloaden of herstellen.
+   - Schone lei wizard voor nieuwe gebruikers.
 
 ---
 
-## 📲 Installeren op je iPhone als App (Kaartje op je Home Screen)
+## 📲 Installeren op je iPhone (Beginscherm / WebApp)
 
 1. Open **Safari** op je iPhone.
-2. Surf naar je Tailscale NUC adres: `http://[jouw-nuc-ip]:3001`.
+2. Surf naar `http://192.168.0.10:3001` of `https://wimvaes-boop.github.io/MyBudget/`.
 3. Tik onderaan in Safari op de **Deelknop** (het vierkantje met het pijltje omhoog).
 4. Kies in de lijst voor **'Zet op beginscherm'** (Add to Home Screen).
 5. Tik op **'Voeg toe'**.
 
 Nu staat MyBudget als een volwaardige native app op je iPhone zonder browserbalken!
+
+---
+
+## 📖 Meer Informatie
+Raadpleeg [**HANDLEIDING.md**](HANDLEIDING.md) voor de complete documentatie, veelgestelde vragen en stap-voor-stap instructies.

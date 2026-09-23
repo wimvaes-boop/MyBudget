@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Lock, Sliders, Download, Upload, Smartphone, RefreshCw, Check, AlertTriangle, ShieldCheck, Tag, Plus, Edit2, KeyRound } from 'lucide-react';
+import { Lock, Sliders, Download, Upload, Smartphone, RefreshCw, Check, AlertTriangle, ShieldCheck, Tag, Plus, Edit2, KeyRound, BookOpen } from 'lucide-react';
 import { formatCurrency } from '../services/formatters';
 
-export default function SettingsView({ settings, categories = [], onSaveSettings, onUpdateCategory, onExport, onImport, onReset, onReRunWizard }) {
+export default function SettingsView({ settings, categories = [], onSaveSettings, onUpdateCategory, onExport, onImport, onReset, onReRunWizard, onOpenManual }) {
   const [pinEnabled, setPinEnabled] = useState(settings?.pinEnabled || false);
   const [pinCode, setPinCode] = useState(settings?.pinCode || '');
   const [salaryDay, setSalaryDay] = useState(settings?.salaryDay || 25);
@@ -210,7 +210,23 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
         </div>
       </div>
 
-      {/* 4. Data Backup & Restore */}
+      {/* 4. Handleiding & Hulp */}
+      <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-100 space-y-2">
+        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <BookOpen className="w-4 h-4 text-emerald-600" /> Hulp & Handleiding
+        </h3>
+        <p className="text-xs text-slate-500">Bekijk de complete handleiding met tips over het dagbudget, de scanner en installatie op iPhone.</p>
+        <button
+          onClick={onOpenManual}
+          type="button"
+          className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 border border-emerald-200/80 rounded-2xl text-xs font-bold text-emerald-800 flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs"
+        >
+          <BookOpen className="w-4 h-4 text-emerald-600" />
+          <span>Gebruikershandleiding Openen</span>
+        </button>
+      </div>
+
+      {/* 5. Data Backup & Restore */}
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-100 space-y-3">
         <h3 className="text-sm font-bold text-slate-900">Data & Veiligheid</h3>
         <p className="text-xs text-slate-500">Exporteer je gegevens als JSON backup of herstel een eerdere backup.</p>

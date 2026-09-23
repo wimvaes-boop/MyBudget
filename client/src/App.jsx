@@ -13,6 +13,7 @@ import SettingsView from './components/SettingsView';
 import RecurringManager from './components/RecurringManager';
 import AssetsManager from './components/AssetsManager';
 import ReceiptScannerModal from './components/ReceiptScannerModal';
+import UserManualModal from './components/UserManualModal';
 import { api } from './services/api';
 import { formatCurrency } from './services/formatters';
 import { Plus, Sparkles, Filter, CheckCircle2, TrendingUp, ArrowDownRight, ArrowUpRight, Wallet, Shield, Camera } from 'lucide-react';
@@ -24,6 +25,7 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard' | 'advisor' | 'charts' | 'settings'
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isManualOpen, setIsManualOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all'); // 'all' | 'daily' | 'fixed' | 'income' | 'savings'
   
   // Security & Onboarding states
@@ -225,6 +227,7 @@ export default function App() {
         onLock={handleManualLock}
         onRefresh={handleRefresh}
         isRefreshing={isRefreshing}
+        onOpenManual={() => setIsManualOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -430,6 +433,7 @@ export default function App() {
               onImport={handleImport}
               onReset={handleReset}
               onReRunWizard={() => setShowWizard(true)}
+              onOpenManual={() => setIsManualOpen(true)}
             />
           </div>
         )}
@@ -467,6 +471,12 @@ export default function App() {
           onClose={() => setShowWizard(false)}
         />
       )}
+
+      {/* In-App Interactive User Manual Modal */}
+      <UserManualModal
+        isOpen={isManualOpen}
+        onClose={() => setIsManualOpen(false)}
+      />
 
     </div>
   );
