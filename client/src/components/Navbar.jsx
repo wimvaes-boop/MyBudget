@@ -34,9 +34,9 @@ export default function Navbar({ advisorData, settings, onLock, onRefresh, isRef
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>NUC Dashboard</span>
+              <span>{advisorData?.isStandalone || window?.location?.hostname?.includes('github.io') ? 'Standalone Privé' : 'NUC Dashboard'}</span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-400">Tailscale OK</span>
+              <span className="text-slate-400">{advisorData?.isStandalone || window?.location?.hostname?.includes('github.io') ? 'Lokaal Beveiligd' : 'Tailscale OK'}</span>
             </div>
           </div>
         </div>
