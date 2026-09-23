@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, TrendingUp, AlertTriangle, ShieldCheck, ChevronRight, Calendar, Info, ArrowUpRight } from 'lucide-react';
+import { Sparkles, Calendar, CreditCard, ChevronRight, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '../services/formatters';
 
 export default function AdvisorCard({ advisorData, onGoToAdvisor }) {
@@ -8,6 +8,18 @@ export default function AdvisorCard({ advisorData, onGoToAdvisor }) {
   const { summary, month, categoryAlerts, insights } = advisorData;
   const topInsight = insights?.[0] || null;
   const dangerAlert = categoryAlerts?.find(a => a.level === 'danger') || categoryAlerts?.[0];
+
+  const dailyBudget = summary?.dailySafeToSpend || 0;
+  const todaySpent = summary?.todaySpent || 0;
+  const todayRemaining = summary?.todayRemaining !== undefined 
+    ? summary.todayRemaining 
+    : Math.max(0, dailyBudget - todaySpent);
+  const todayOverspent = summary?.todayOverspent !== undefined
+    ? summary.todayOverspent
+    : Math.max(0, todaySpent - dailyBudget);
+
+  const daysLeft = month?.daysUntilSalary || 1;
+  const daysText = daysLeft === 1 ? '1 dag' : `${daysLeft} dagen`;
 
   return (
     <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white rounded-3xl p-5 shadow-xl shadow-slate-900/10 border border-slate-800 relative overflow-hidden">
@@ -26,7 +38,7 @@ export default function AdvisorCard({ advisorData, onGoToAdvisor }) {
               Financiële Analyse
             </span>
             <span className="text-[11px] text-slate-400">
-              Nog {month?.daysUntilSalary || 15} dagen tot volgend salaris
+              Nog {daysText} tot volgend salaris
             </span>
           </div>
         </div>
@@ -40,36 +52,53 @@ export default function AdvisorCard({ advisorData, onGoToAdvisor }) {
         </button>
       </div>
 
-      {/* Main Metric: Daily Safe-to-Spend Allowance */}
+      {/* Main Metric Cards: Dagbudget & Vandaag Uitgegeven */}
       <div className="grid grid-cols-2 gap-3 mb-4 relative z-10">
-        <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-3.5 border border-slate-700/50">
-          <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1 mb-1">
-            <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Veilig dagbudget
-          </span>
-          <div className="text-2xl font-black text-emerald-400 tracking-tight">
-            € {summary?.dailySafeToSpend?.toFixed(0) || 0}
-            <span className="text-xs text-slate-400 font-normal ml-1">/dag</span>
+        {/* Card 1: Dagbudget */}
+        <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-3.5 border border-slate-700/50 flex flex-col justify-between">
+          <div>
+            <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1 mb-1">
+              <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Dagbudget
+            </span>
+            <div className="text-2xl font-black text-emerald-400 tracking-tight">
+              € {dailyBudget.toFixed(0)}
+              <span className="text-xs text-slate-400 font-normal ml-1">/dag</span>
+            </div>
           </div>
           <span className="text-[10px] text-slate-400 mt-1 block">
-            Vrij te besteden
+            Beschikbaar per dag
           </span>
         </div>
 
-        <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-3.5 border border-slate-700/50">
-          <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1 mb-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-teal-400" /> Noodfonds Dekking
-          </span>
-          <div className="text-2xl font-black text-teal-300 tracking-tight">
-            {summary?.emergencyFundCoverageMonths || 0}
-            <span className="text-xs text-slate-400 font-normal ml-1">mnd</span>
+        {/* Card 2: Vandaag Uitgegeven */}
+        <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-3.5 border border-slate-700/50 flex flex-col justify-between">
+          <div>
+            <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1 mb-1">
+              <CreditCard className="w-3.5 h-3.5 text-teal-400" /> Vandaag uitgegeven
+            </span>
+            <div className="text-2xl font-black text-white tracking-tight">
+              {formatCurrency(todaySpent)}
+            </div>
           </div>
-          <span className="text-[10px] text-slate-400 mt-1 block">
-            Buffer vaste lasten
-          </span>
+          <div className="mt-1">
+            {todaySpent > dailyBudget ? (
+              <span className="text-[10px] text-amber-400 font-medium block">
+                € {todayOverspent.toFixed(2)} boven dagbudget
+              </span>
+            ) : todayRemaining > 0 ? (
+              <span className="text-[10px] text-emerald-400 font-medium block">
+                Nog € {todayRemaining.toFixed(2)} over
+              </span>
+            ) : (
+              <span className="text-[10px] text-slate-400 font-medium block">
+                Precies op dagbudget
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Realtime Alert or Actionable Tip Banner */}
+      {/* Realtime Alert or Actionable Tip Banner (Clean without repetition or cutoff) */}
       {dangerAlert ? (
         <div className="bg-rose-500/15 border border-rose-500/30 rounded-2xl p-3 flex items-start gap-2.5 relative z-10">
           <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
@@ -82,8 +111,14 @@ export default function AdvisorCard({ advisorData, onGoToAdvisor }) {
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 flex items-start gap-2.5 relative z-10">
           <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="text-xs">
-            <span className="font-bold text-emerald-200 block">{topInsight.title}</span>
-            <span className="text-[11px] text-slate-300 line-clamp-1">{topInsight.description}</span>
+            <span className="font-bold text-emerald-200 block">
+              {topInsight.id === 'daily_allowance' ? 'Tempo tot volgend salaris' : topInsight.title}
+            </span>
+            <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+              {topInsight.id === 'daily_allowance'
+                ? `Met nog ${daysText} tot je volgend salaris kun je dagelijks ca. € ${dailyBudget.toFixed(0)} uitgeven aan variabele wensen om perfect op schema te blijven.`
+                : topInsight.description}
+            </p>
           </div>
         </div>
       ) : null}

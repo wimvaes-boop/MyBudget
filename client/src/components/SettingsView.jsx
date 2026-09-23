@@ -90,7 +90,7 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
             className="w-full text-sm font-bold bg-white px-2.5 py-1.5 border border-slate-200 rounded-xl"
           />
           <span className="text-[10px] text-slate-400 mt-1 block">
-            Hierop baseert de adviseur de aftelling en het dagelijks veilig besteedbaar budget.
+            Hierop baseert de adviseur de aftelling en het dagelijks besteedbaar budget.
           </span>
         </div>
 

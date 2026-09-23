@@ -151,6 +151,26 @@ export function analyzeFinances() {
   
   const dailySafeToSpend = Math.max(0, Math.round((remainingVariableBudget / Math.max(1, daysUntilSalary)) * 10) / 10);
 
+  // Today's spending calculation
+  const todayDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+  let todaySpent = 0;
+  monthTransactions.forEach(t => {
+    if (t.type === 'expense') {
+      const dStr = t.date || t.createdAt || '';
+      if (dStr.startsWith(todayDateStr)) {
+        todaySpent += Number(t.amount) || 0;
+      } else if (dStr) {
+        const d = new Date(dStr);
+        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth && d.getDate() === currentDay) {
+          todaySpent += Number(t.amount) || 0;
+        }
+      }
+    }
+  });
+
+  const todayRemaining = Math.max(0, dailySafeToSpend - todaySpent);
+  const todayOverspent = Math.max(0, todaySpent - dailySafeToSpend);
+
   // Wealth & Emergency Fund Analysis
   const totalLiquidAssets = assets
     .filter(a => a.category === 'savings')
@@ -258,12 +278,13 @@ export function analyzeFinances() {
 
   // Generate Top Advisory Recommendations
   if (dailySafeToSpend > 0) {
+    const daysText = daysUntilSalary === 1 ? '1 dag' : `${daysUntilSalary} dagen`;
     insights.push({
       id: 'daily_allowance',
       type: 'tip',
       badge: 'Vrij Besteedbaar',
-      title: `Veilig dagbudget: € ${dailySafeToSpend.toFixed(0)} / dag`,
-      description: `Met nog ${daysUntilSalary} dagen tot je volgende salaris kun je dagelijks ca. € ${dailySafeToSpend.toFixed(0)} uitgeven aan variabele wensen om perfect op schema te blijven.`,
+      title: `Dagbudget: € ${dailySafeToSpend.toFixed(0)} / dag`,
+      description: `Met nog ${daysText} tot je volgend salaris kun je dagelijks ca. € ${dailySafeToSpend.toFixed(0)} uitgeven aan variabele wensen om perfect op schema te blijven.`,
       icon: 'Calendar',
       color: 'emerald'
     });
@@ -349,6 +370,9 @@ export function analyzeFinances() {
       budgetedIncome: totalBudgetedIncome,
       budgetedExpenses: totalBudgetedExpenses,
       dailySafeToSpend,
+      todaySpent,
+      todayRemaining,
+      todayOverspent,
       healthScore,
       totalNetWorth,
       totalLiquidAssets,
