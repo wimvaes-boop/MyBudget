@@ -424,6 +424,32 @@ export const api = {
 
     const state = getLocalState();
     state.settings = { ...state.settings, ...settings };
+
+    // Synchronize salary and meal voucher category budgets & recurring items with settings
+    if (!state.categories) state.categories = [];
+    if (settings.monthlyNetIncome !== undefined) {
+      const catSalary = state.categories.find(c => c.id === 'inc_salary');
+      if (catSalary) catSalary.budget = Number(settings.monthlyNetIncome || 0);
+
+      if (!state.recurring) state.recurring = [];
+      const recSalary = state.recurring.find(r => r.categoryId === 'inc_salary' || r.id === 'rec_salary');
+      if (recSalary) {
+        recSalary.amount = Number(settings.monthlyNetIncome || 0);
+        recSalary.dayOfMonth = Number(settings.salaryDay || 25);
+      }
+    }
+
+    if (settings.mealVoucherMonthly !== undefined) {
+      const catMeal = state.categories.find(c => c.id === 'inc_meal_vouchers');
+      if (catMeal) catMeal.budget = Number(settings.mealVoucherMonthly || 0);
+
+      if (!state.recurring) state.recurring = [];
+      const recMeal = state.recurring.find(r => r.categoryId === 'inc_meal_vouchers' || r.id === 'rec_meals');
+      if (recMeal) {
+        recMeal.amount = Number(settings.mealVoucherMonthly || 0);
+      }
+    }
+
     saveLocalState(state);
     return state.settings;
   },

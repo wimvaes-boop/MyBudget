@@ -104,9 +104,25 @@ export function analyzeFinancesLocally(state) {
     }
   });
 
-  const totalBudgetedIncome = categories
-    .filter(c => c.type === 'income')
-    .reduce((sum, c) => sum + (Number(c.budget) || 0), 0) || Number(settings?.monthlyNetIncome) || 0;
+  // Synchronize base salary & meal vouchers with settings if provided
+  const baseSalaryBudget = settings?.monthlyNetIncome !== undefined ? Number(settings.monthlyNetIncome) : Number(categories.find(c => c.id === 'inc_salary')?.budget || 0);
+  const mealVoucherBudget = settings?.mealVoucherMonthly !== undefined ? Number(settings.mealVoucherMonthly) : Number(categories.find(c => c.id === 'inc_meal_vouchers')?.budget || 0);
+
+  // Sync category budgets for salary & meal vouchers
+  const catSalary = categories.find(c => c.id === 'inc_salary');
+  if (catSalary && settings?.monthlyNetIncome !== undefined) {
+    catSalary.budget = baseSalaryBudget;
+  }
+  const catMeal = categories.find(c => c.id === 'inc_meal_vouchers');
+  if (catMeal && settings?.mealVoucherMonthly !== undefined) {
+    catMeal.budget = mealVoucherBudget;
+  }
+
+  const otherIncomeBudgets = categories
+    .filter(c => c.type === 'income' && c.id !== 'inc_salary' && c.id !== 'inc_meal_vouchers')
+    .reduce((sum, c) => sum + (Number(c.budget) || 0), 0);
+
+  const totalBudgetedIncome = baseSalaryBudget + mealVoucherBudget + otherIncomeBudgets;
 
   const totalBudgetedExpenses = categories
     .filter(c => c.type === 'expense')

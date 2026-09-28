@@ -194,7 +194,31 @@ app.get('/api/settings', (req, res) => {
 });
 
 app.post('/api/settings', (req, res) => {
-  const updated = db.updateSettings(req.body);
+  const settings = req.body;
+  const updated = db.updateSettings(settings);
+
+  // Synchronize salary and meal voucher category budgets & recurring items with settings
+  if (settings.monthlyNetIncome !== undefined) {
+    db.updateCategory('inc_salary', { budget: Number(settings.monthlyNetIncome || 0) });
+    const recSalary = db.getRecurring().find(r => r.categoryId === 'inc_salary' || r.id === 'rec_salary');
+    if (recSalary) {
+      db.updateRecurring(recSalary.id, {
+        amount: Number(settings.monthlyNetIncome || 0),
+        dayOfMonth: Number(settings.salaryDay || 25)
+      });
+    }
+  }
+
+  if (settings.mealVoucherMonthly !== undefined) {
+    db.updateCategory('inc_meal_vouchers', { budget: Number(settings.mealVoucherMonthly || 0) });
+    const recMeal = db.getRecurring().find(r => r.categoryId === 'inc_meal_vouchers' || r.id === 'rec_meals');
+    if (recMeal) {
+      db.updateRecurring(recMeal.id, {
+        amount: Number(settings.mealVoucherMonthly || 0)
+      });
+    }
+  }
+
   res.json(updated);
 });
 

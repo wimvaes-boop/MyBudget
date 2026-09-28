@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, Sliders, Download, Upload, Smartphone, RefreshCw, Check, AlertTriangle, ShieldCheck, Tag, Plus, Edit2, KeyRound, BookOpen, Sparkles, Calendar } from 'lucide-react';
 import { FREQUENCIES, getMonthlyEquivalent, formatFrequencyLabel, formatCurrency } from '../services/formatters';
 
@@ -22,6 +22,18 @@ export default function SettingsView({
   const [mealVoucherMonthly, setMealVoucherMonthly] = useState(settings?.mealVoucherMonthly ?? 0);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
+  // Sync state if settings prop changes
+  useEffect(() => {
+    if (settings) {
+      setPinEnabled(settings.pinEnabled || false);
+      setPinCode(settings.pinCode || '');
+      setSalaryDay(settings.salaryDay || 25);
+      setPeriodType(settings.periodType || 'salary_cycle');
+      setMonthlyNetIncome(settings.monthlyNetIncome ?? 0);
+      setMealVoucherMonthly(settings.mealVoucherMonthly ?? 0);
+    }
+  }, [settings]);
+
   // Category budget edit modal / state
   const [editingCategory, setEditingCategory] = useState(null);
   const [catBudget, setCatBudget] = useState('');
@@ -29,13 +41,15 @@ export default function SettingsView({
 
   const handleSaveGeneral = async (e) => {
     e.preventDefault();
+    const incomeVal = parseFloat(monthlyNetIncome) || 0;
+    const mealVal = parseFloat(mealVoucherMonthly) || 0;
     await onSaveSettings({
       pinEnabled,
       pinCode: pinEnabled ? pinCode : '',
       salaryDay: parseInt(salaryDay) || 25,
       periodType,
-      monthlyNetIncome: parseFloat(monthlyNetIncome) || 0,
-      mealVoucherMonthly: parseFloat(mealVoucherMonthly) || 0
+      monthlyNetIncome: incomeVal,
+      mealVoucherMonthly: mealVal
     });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
@@ -56,6 +70,17 @@ export default function SettingsView({
       billingAmount: billAmt,
       frequency: catFrequency
     });
+    if (editingCategory.id === 'inc_salary') {
+      await onSaveSettings({
+        ...settings,
+        monthlyNetIncome: monthlyAmt
+      });
+    } else if (editingCategory.id === 'inc_meal_vouchers') {
+      await onSaveSettings({
+        ...settings,
+        mealVoucherMonthly: monthlyAmt
+      });
+    }
     setEditingCategory(null);
   };
 
