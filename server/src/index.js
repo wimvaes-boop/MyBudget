@@ -102,6 +102,47 @@ app.delete('/api/categories/:id', (req, res) => {
   res.json({ success: true });
 });
 
+app.post('/api/categories/smart-fill', (req, res) => {
+  try {
+    const { income } = req.body;
+    const settings = db.getSettings();
+    const effectiveIncome = Number(income) || Number(settings.monthlyNetIncome) || 2400;
+
+    const smartBudgets = {
+      exp_housing: Math.round(effectiveIncome * 0.33),
+      exp_energy: Math.round(effectiveIncome * 0.06),
+      exp_water: Math.round(effectiveIncome * 0.015),
+      exp_insurance: Math.round(effectiveIncome * 0.035),
+      exp_telecom: Math.round(effectiveIncome * 0.025),
+      exp_tax: Math.round(effectiveIncome * 0.025),
+      exp_groceries: Math.round(effectiveIncome * 0.14),
+      exp_transport: Math.round(effectiveIncome * 0.06),
+      exp_health: Math.round(effectiveIncome * 0.02),
+      exp_dining: Math.round(effectiveIncome * 0.045),
+      exp_clothing: Math.round(effectiveIncome * 0.03),
+      exp_leisure: Math.round(effectiveIncome * 0.035),
+      exp_travel: Math.round(effectiveIncome * 0.045),
+      exp_subscriptions: 35,
+      exp_other_var: Math.round(effectiveIncome * 0.02),
+      sav_emergency: Math.round(effectiveIncome * 0.08),
+      sav_invest: Math.round(effectiveIncome * 0.05),
+      sav_pension: 85
+    };
+
+    const categories = db.getCategories();
+    categories.forEach(cat => {
+      if (smartBudgets[cat.id] !== undefined) {
+        cat.budget = smartBudgets[cat.id];
+      }
+    });
+    db.saveCategories(categories);
+    res.json({ success: true, categories: db.getCategories() });
+  } catch (err) {
+    console.error('Smart fill error:', err);
+    res.status(500).json({ error: 'Fout bij invullen richtbudgetten' });
+  }
+});
+
 // Recurring Items
 app.get('/api/recurring', (req, res) => {
   res.json(db.getRecurring());
@@ -206,6 +247,37 @@ app.post('/api/wizard/complete', (req, res) => {
         const rec = db.getRecurring().find(r => r.categoryId === catId);
         if (rec) db.updateRecurring(rec.id, { amount: val });
       });
+    }
+
+    if (req.body.autoFillSmartBudgets) {
+      const inc = Number(income || 0) || 2400;
+      const smartBudgets = {
+        exp_housing: Math.round(inc * 0.33),
+        exp_energy: Math.round(inc * 0.06),
+        exp_water: Math.round(inc * 0.015),
+        exp_insurance: Math.round(inc * 0.035),
+        exp_telecom: Math.round(inc * 0.025),
+        exp_tax: Math.round(inc * 0.025),
+        exp_groceries: Math.round(inc * 0.14),
+        exp_transport: Math.round(inc * 0.06),
+        exp_health: Math.round(inc * 0.02),
+        exp_dining: Math.round(inc * 0.045),
+        exp_clothing: Math.round(inc * 0.03),
+        exp_leisure: Math.round(inc * 0.035),
+        exp_travel: Math.round(inc * 0.045),
+        exp_subscriptions: 35,
+        exp_other_var: Math.round(inc * 0.02),
+        sav_emergency: Math.round(inc * 0.08),
+        sav_invest: Math.round(inc * 0.05),
+        sav_pension: 85
+      };
+      const cats = db.getCategories();
+      cats.forEach(c => {
+        if ((!c.budget || c.budget === 0) && smartBudgets[c.id] !== undefined) {
+          c.budget = smartBudgets[c.id];
+        }
+      });
+      db.saveCategories(cats);
     }
 
     res.json({ success: true, settings: db.getSettings() });

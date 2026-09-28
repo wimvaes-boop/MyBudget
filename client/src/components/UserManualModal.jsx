@@ -122,7 +122,7 @@ export default function UserManualModal({ isOpen, onClose }) {
               <strong>Pincode:</strong> In het tabblad <em>Instellingen</em> kun je een 4-cijferige pincode aanzetten. Zodra je de app afsluit, vraagt MyBudget netjes om je code.
             </li>
             <li>
-              <strong>Backup Downloaden:</strong> Sla met één klik een <code>.json</code> bestand op met al je categorieën, transacties en spaardoelen.
+              <strong>1-Klik Backup Downloaden:</strong> Sla direct een <code>.json</code> bestand op je toestel op met al je categorieën, transacties en spaardoelen. Werkt overal (ook op iPhone en GitHub Pages).
             </li>
             <li>
               <strong>Backup Herstellen:</strong> Laad je backupbestand op elk moment in op een nieuwe telefoon of computer.
@@ -143,10 +143,26 @@ export default function UserManualModal({ isOpen, onClose }) {
         <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
             <span className="font-bold text-slate-900 block text-[11px]">
-              Waarom geeft mijn hypotheek geen waarschuwingskleur?
+              Hoe werkt de budgetperiode en het resetten?
             </span>
             <p className="text-[11px]">
-              Omdat een hypotheek een vaste last is die je maandelijks betaalt. Dat het budget 100% bereikt is, is gepland en volstrekt normaal. Daarom toont MyBudget kalm <em>'✓ Betaald / Voldaan'</em>.
+              MyBudget ondersteunt twee modi: <strong>Salariscyclus</strong> (standaard, bv. van de 25e t/m 24e van volgende maand) en <strong>Kalendermaand</strong> (1e t/m 31e). Bij 'Salariscyclus' herstart je cyclus automatisch zodra je salarisdag aanbreekt. Je kunt dit op elk moment wisselen in Instellingen.
+            </p>
+          </div>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span className="font-bold text-slate-900 block text-[11px]">
+              Belastingen & Verzekeringen per jaar of kwartaal?
+            </span>
+            <p className="text-[11px]">
+              Bij het instellen van categorieën of vaste lasten kun je nu kiezen voor <strong>Per jaar</strong>, <strong>Per kwartaal / 3 mnd</strong>, <strong>Per 4 mnd</strong> of <strong>Per halfjaar</strong>. MyBudget berekent automatisch de maandelijkse reservering zodat je budget dagelijks klopt.
+            </p>
+          </div>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <span className="font-bold text-slate-900 block text-[11px]">
+              Staan je budgetten op € 0?
+            </span>
+            <p className="text-[11px]">
+              Tik in Instellingen op de knop <strong>'🪄 Slimme Richtbudgetten'</strong>. De adviseur vult meteen evenwichtige richtbedragen in volgens de 50/30/20 methode op basis van jouw netto loon.
             </p>
           </div>
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
@@ -154,7 +170,7 @@ export default function UserManualModal({ isOpen, onClose }) {
               Kan ik de app delen met iemand anders?
             </span>
             <p className="text-[11px]">
-              Ja! Deel de openbare link <code>https://wimvaes-boop.github.io/MyBudget/</code>. De andere persoon krijgt een eigen blanco wizard en bewaart alle gegevens lokaal op zijn/haar eigen telefoon.
+              Ja! Deel de link <code>https://wimvaes-boop.github.io/MyBudget/</code>. De andere persoon start met een schone lei (alles op 0) en alle data blijft 100% privé op zijn/haar eigen toestel opgeslagen.
             </p>
           </div>
         </div>
@@ -177,7 +193,7 @@ export default function UserManualModal({ isOpen, onClose }) {
                 Gebruikershandleiding
               </h2>
               <span className="text-[11px] text-slate-400 block">
-                MyBudget v1.2.0 • Snelgids & Uitleg
+                MyBudget v1.3.0 • Snelgids & Uitleg
               </span>
             </div>
           </div>

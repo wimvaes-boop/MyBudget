@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
-import { Lock, Sliders, Download, Upload, Smartphone, RefreshCw, Check, AlertTriangle, ShieldCheck, Tag, Plus, Edit2, KeyRound, BookOpen } from 'lucide-react';
-import { formatCurrency } from '../services/formatters';
+import { Lock, Sliders, Download, Upload, Smartphone, RefreshCw, Check, AlertTriangle, ShieldCheck, Tag, Plus, Edit2, KeyRound, BookOpen, Sparkles, Calendar } from 'lucide-react';
+import { FREQUENCIES, getMonthlyEquivalent, formatFrequencyLabel, formatCurrency } from '../services/formatters';
 
-export default function SettingsView({ settings, categories = [], onSaveSettings, onUpdateCategory, onExport, onImport, onReset, onReRunWizard, onOpenManual }) {
+export default function SettingsView({
+  settings,
+  categories = [],
+  onSaveSettings,
+  onUpdateCategory,
+  onSmartFillBudgets,
+  onExport,
+  onImport,
+  onReset,
+  onReRunWizard,
+  onOpenManual
+}) {
   const [pinEnabled, setPinEnabled] = useState(settings?.pinEnabled || false);
   const [pinCode, setPinCode] = useState(settings?.pinCode || '');
   const [salaryDay, setSalaryDay] = useState(settings?.salaryDay || 25);
+  const [periodType, setPeriodType] = useState(settings?.periodType || 'salary_cycle');
   const [monthlyNetIncome, setMonthlyNetIncome] = useState(settings?.monthlyNetIncome ?? 0);
   const [mealVoucherMonthly, setMealVoucherMonthly] = useState(settings?.mealVoucherMonthly ?? 0);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -13,6 +25,7 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
   // Category budget edit modal / state
   const [editingCategory, setEditingCategory] = useState(null);
   const [catBudget, setCatBudget] = useState('');
+  const [catFrequency, setCatFrequency] = useState('monthly');
 
   const handleSaveGeneral = async (e) => {
     e.preventDefault();
@@ -20,6 +33,7 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
       pinEnabled,
       pinCode: pinEnabled ? pinCode : '',
       salaryDay: parseInt(salaryDay) || 25,
+      periodType,
       monthlyNetIncome: parseFloat(monthlyNetIncome) || 0,
       mealVoucherMonthly: parseFloat(mealVoucherMonthly) || 0
     });
@@ -29,12 +43,19 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
 
   const handleEditBudget = (cat) => {
     setEditingCategory(cat);
-    setCatBudget(cat.budget.toString());
+    setCatFrequency(cat.frequency || 'monthly');
+    setCatBudget((cat.billingAmount || cat.budget || 0).toString());
   };
 
   const handleSaveBudget = async () => {
     if (!editingCategory) return;
-    await onUpdateCategory(editingCategory.id, { budget: parseFloat(catBudget) || 0 });
+    const billAmt = parseFloat(catBudget) || 0;
+    const monthlyAmt = getMonthlyEquivalent(billAmt, catFrequency);
+    await onUpdateCategory(editingCategory.id, {
+      budget: monthlyAmt,
+      billingAmount: billAmt,
+      frequency: catFrequency
+    });
     setEditingCategory(null);
   };
 
@@ -94,6 +115,49 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
           </span>
         </div>
 
+        {/* Periode Type Kiezer */}
+        <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-2">
+          <label className="text-[11px] font-bold text-slate-700 block">
+            Budgetperiode Berekening
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setPeriodType('salary_cycle')}
+              className={`p-2.5 rounded-xl border text-left transition-all ${
+                periodType === 'salary_cycle'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900 ring-2 ring-emerald-500/20 shadow-xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span className="text-xs font-bold block">Salariscyclus</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5 leading-snug">
+                Vanaf de {salaryDay}e t/m dag vóór volgend loon
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPeriodType('calendar_month')}
+              className={`p-2.5 rounded-xl border text-left transition-all ${
+                periodType === 'calendar_month'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900 ring-2 ring-emerald-500/20 shadow-xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span className="text-xs font-bold block">Kalendermaand</span>
+              <span className="text-[10px] text-slate-500 block mt-0.5 leading-snug">
+                1e t/m laatste dag van de maand
+              </span>
+            </button>
+          </div>
+          <span className="text-[10px] text-slate-400 block">
+            {periodType === 'salary_cycle'
+              ? '💡 Jouw periode telt af tussen twee salarisstortingen (bv. 25 sep - 24 okt).'
+              : '💡 Jouw periode volgt strikt de kalendermaand (1 - 30/31).'}
+          </span>
+        </div>
+
         {/* PIN CODE TOGGLE */}
         <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
           <div className="flex items-center justify-between">
@@ -140,50 +204,116 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
 
       {/* 2. Categorie Budgetten Beheren */}
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-100">
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mb-1">
-          <Tag className="w-4 h-4 text-emerald-600" /> Categorieën & Maandbudgetten
-        </h3>
-        <p className="text-xs text-slate-500 mb-3">Tik op een categorie om het maandbedrag aan te passen.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <Tag className="w-4 h-4 text-emerald-600" /> Categorieën & Richtbudgetten
+            </h3>
+            <p className="text-xs text-slate-500">Pas per categorie aan of kies een factuurtermijn (jaarlijks, kwartaal, etc.).</p>
+          </div>
+          {onSmartFillBudgets && (
+            <button
+              type="button"
+              onClick={onSmartFillBudgets}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800 transition-all active:scale-95 shadow-xs whitespace-nowrap self-start sm:self-auto"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>🪄 Slimme Richtbudgetten</span>
+            </button>
+          )}
+        </div>
 
-        <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 divide-y divide-slate-100">
-          {categories.filter(c => c.type === 'expense').map((cat) => (
-            <div key={cat.id} className="pt-2 pb-1 flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-700">{cat.name}</span>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900">{formatCurrency(cat.budget)}</span>
-                <button
-                  onClick={() => handleEditBudget(cat)}
-                  className="p-1 text-slate-400 hover:text-slate-800"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
+        <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1 divide-y divide-slate-100">
+          {categories.filter(c => c.type === 'expense').map((cat) => {
+            const isNonMonthly = cat.frequency && cat.frequency !== 'monthly';
+            return (
+              <div key={cat.id} className="pt-2 pb-1.5 flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-semibold text-slate-700 block">{cat.name}</span>
+                  {isNonMonthly && (
+                    <span className="text-[10px] text-slate-400">
+                      Factuur: {formatCurrency(cat.billingAmount || 0)} {formatFrequencyLabel(cat.frequency)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    <span className="font-bold text-slate-900 block">{formatCurrency(cat.budget)}/mnd</span>
+                  </div>
+                  <button
+                    onClick={() => handleEditBudget(cat)}
+                    className="p-1.5 text-slate-400 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Modal edit category */}
         {editingCategory && (
           <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white p-5 rounded-3xl max-w-xs w-full shadow-2xl space-y-3">
-              <h4 className="text-sm font-bold text-slate-900">Budget voor {editingCategory.name}</h4>
-              <input
-                type="number"
-                value={catBudget}
-                onChange={(e) => setCatBudget(e.target.value)}
-                className="w-full text-lg font-bold bg-slate-50 px-3 py-2 border rounded-xl"
-                autoFocus
-              />
-              <div className="flex gap-2">
+            <div className="bg-white p-5 rounded-3xl max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Budget instellen voor</h4>
+                <p className="text-xs text-emerald-700 font-semibold">{editingCategory.name}</p>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">Betalingstermijn / Frequentie</label>
+                  <select
+                    value={catFrequency}
+                    onChange={(e) => setCatFrequency(e.target.value)}
+                    className="w-full text-xs font-semibold bg-slate-50 px-3 py-2 border border-slate-200 rounded-xl"
+                  >
+                    {FREQUENCIES.map(f => (
+                      <option key={f.value} value={f.value}>{f.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                    {catFrequency === 'monthly' ? 'Maandbedrag (€)' : `Bedrag per ${formatFrequencyLabel(catFrequency)} (€)`}
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={catBudget}
+                    onChange={(e) => setCatBudget(e.target.value)}
+                    className="w-full text-lg font-bold bg-slate-50 px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500"
+                    autoFocus
+                  />
+                </div>
+
+                {catFrequency !== 'monthly' && (
+                  <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl text-xs text-emerald-900 space-y-0.5">
+                    <span className="font-bold block">Maandelijkse reservering:</span>
+                    <span className="text-sm font-black text-emerald-700">
+                      {formatCurrency(getMonthlyEquivalent(parseFloat(catBudget) || 0, catFrequency))} per maand
+                    </span>
+                    <span className="text-[10px] text-emerald-700/80 block">
+                      Dit bedrag wordt maandelijks gereserveerd in je budget zodat je ruim op tijd gedekt bent.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-1">
                 <button
+                  type="button"
                   onClick={() => setEditingCategory(null)}
-                  className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold"
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors"
                 >
                   Annuleren
                 </button>
                 <button
+                  type="button"
                   onClick={handleSaveBudget}
-                  className="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 active:scale-95"
                 >
                   Opslaan
                 </button>
@@ -264,7 +394,7 @@ export default function SettingsView({ settings, categories = [], onSaveSettings
 
         <div className="pt-3 border-t border-slate-100 text-center">
           <span className="text-[11px] font-bold text-slate-400">
-            MyBudget v1.2.0 • Geïnstalleerd op NUC Server
+            MyBudget v1.3.0 • Geïnstalleerd op NUC Server
           </span>
         </div>
       </div>

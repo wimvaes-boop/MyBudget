@@ -16,23 +16,70 @@ export function analyzeFinancesLocally(state) {
   const currentMonth = now.getMonth(); // 0-11
   const currentDay = now.getDate();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  
-  const monthProgressPct = Math.round((currentDay / daysInMonth) * 100);
 
-  // Salary countdown
-  let salaryDay = settings.salaryDay || 25;
-  let daysUntilSalary = 0;
-  if (currentDay <= salaryDay) {
-    daysUntilSalary = salaryDay - currentDay;
+  const periodType = settings.periodType || 'salary_cycle'; // 'salary_cycle' | 'calendar_month'
+  const salaryDay = settings.salaryDay || 25;
+
+  let cycleStartDate, cycleEndDate, currentDayInCycle, daysInCycle, daysUntilSalary;
+  let periodLabel = '';
+
+  if (periodType === 'salary_cycle') {
+    let startYear = currentYear;
+    let startMonth = currentMonth;
+    if (currentDay < salaryDay) {
+      startMonth = currentMonth - 1;
+      if (startMonth < 0) {
+        startMonth = 11;
+        startYear -= 1;
+      }
+    }
+    const maxDaysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate();
+    const effectiveStartDay = Math.min(salaryDay, maxDaysInStartMonth);
+    cycleStartDate = new Date(startYear, startMonth, effectiveStartDay, 0, 0, 0, 0);
+
+    let endYear = startYear;
+    let endMonth = startMonth + 1;
+    if (endMonth > 11) {
+      endMonth = 0;
+      endYear += 1;
+    }
+    const maxDaysInEndMonth = new Date(endYear, endMonth + 1, 0).getDate();
+    const effectiveEndDay = Math.min(salaryDay, maxDaysInEndMonth);
+    const nextSalaryDate = new Date(endYear, endMonth, effectiveEndDay, 0, 0, 0, 0);
+    cycleEndDate = new Date(nextSalaryDate.getTime() - 1);
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    daysInCycle = Math.max(1, Math.round((nextSalaryDate - cycleStartDate) / msPerDay));
+    currentDayInCycle = Math.max(1, Math.min(daysInCycle, Math.floor((now - cycleStartDate) / msPerDay) + 1));
+    daysUntilSalary = Math.max(0, Math.ceil((nextSalaryDate - now) / msPerDay));
+    if (daysUntilSalary === 0) daysUntilSalary = 1;
+
+    const startMonthName = cycleStartDate.toLocaleDateString('nl-BE', { month: 'short' });
+    const endMonthName = cycleEndDate.toLocaleDateString('nl-BE', { month: 'short' });
+    periodLabel = `${effectiveStartDay} ${startMonthName} – ${cycleEndDate.getDate()} ${endMonthName}`;
   } else {
-    daysUntilSalary = (daysInMonth - currentDay) + salaryDay;
+    cycleStartDate = new Date(currentYear, currentMonth, 1, 0, 0, 0, 0);
+    cycleEndDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+    daysInCycle = daysInMonth;
+    currentDayInCycle = currentDay;
+    if (currentDay <= salaryDay) {
+      daysUntilSalary = salaryDay - currentDay;
+    } else {
+      daysUntilSalary = (daysInMonth - currentDay) + salaryDay;
+    }
+    if (daysUntilSalary === 0) daysUntilSalary = 1;
+    periodLabel = now.toLocaleDateString('nl-BE', { month: 'long', year: 'numeric' });
   }
-  if (daysUntilSalary === 0) daysUntilSalary = 1;
 
-  // Current month's transactions
+  const monthProgressPct = Math.min(100, Math.round((currentDayInCycle / daysInCycle) * 100));
+
+  // Transactions within current cycle
+  const cycleStartIso = cycleStartDate.toISOString().split('T')[0];
+  const cycleEndIso = cycleEndDate.toISOString().split('T')[0];
+
   const monthTransactions = transactions.filter(t => {
-    const d = new Date(t.date);
-    return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    const dStr = t.date || (t.createdAt ? t.createdAt.split('T')[0] : '');
+    return dStr >= cycleStartIso && dStr <= cycleEndIso;
   });
 
   const categorySpending = {};
@@ -288,6 +335,12 @@ export function analyzeFinancesLocally(state) {
       monthIndex: currentMonth,
       currentDay,
       daysInMonth,
+      currentDayInCycle,
+      daysInCycle,
+      periodLabel,
+      periodType,
+      cycleStartDate: cycleStartIso,
+      cycleEndDate: cycleEndIso,
       daysUntilSalary,
       monthProgressPct
     },

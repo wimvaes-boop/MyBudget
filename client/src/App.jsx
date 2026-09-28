@@ -151,8 +151,23 @@ export default function App() {
     }
   };
 
-  const handleExport = () => {
-    window.location.href = '/api/export';
+  const handleExport = async () => {
+    try {
+      const data = await api.exportData();
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mybudget-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export error:', err);
+      alert('Fout bij het maken van de backup: ' + (err.message || 'Onbekende fout'));
+    }
   };
 
   const handleImport = async (e) => {
@@ -161,15 +176,23 @@ export default function App() {
     try {
       const text = await file.text();
       const json = JSON.parse(text);
-      await fetch('/api/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(json)
-      });
+      await api.importData(json);
       alert('Data succesvol hersteld!');
       await loadData();
     } catch (err) {
-      alert('Fout bij importeren van backup');
+      console.error('Import error:', err);
+      alert('Fout bij importeren van backup: ' + (err.message || 'Controleer of het een geldig JSON backup bestand is'));
+    }
+  };
+
+  const handleSmartFillBudgets = async () => {
+    try {
+      await api.fillSmartBudgets();
+      await loadData();
+      alert('🪄 Slimme richtbudgetten succesvol berekend en ingevuld volgens de 50/30/20 regel!');
+    } catch (err) {
+      console.error('Smart fill error:', err);
+      alert('Fout bij invullen richtbudgetten: ' + (err.message || 'Onbekende fout'));
     }
   };
 
@@ -247,10 +270,10 @@ export default function App() {
             <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-100">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Maandbalans ({new Date().toLocaleDateString('nl-BE', { month: 'long', year: 'numeric' })})
+                  {advisor?.month?.periodLabel ? `Periode (${advisor.month.periodLabel})` : `Maandbalans (${new Date().toLocaleDateString('nl-BE', { month: 'long', year: 'numeric' })})`}
                 </span>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-                  Dag {advisor?.month?.currentDay} / {advisor?.month?.daysInMonth}
+                  Dag {advisor?.month?.currentDayInCycle || advisor?.month?.currentDay} / {advisor?.month?.daysInCycle || advisor?.month?.daysInMonth}
                 </span>
               </div>
 
@@ -429,6 +452,7 @@ export default function App() {
               categories={categories}
               onSaveSettings={handleSaveSettings}
               onUpdateCategory={handleUpdateCategory}
+              onSmartFillBudgets={handleSmartFillBudgets}
               onExport={handleExport}
               onImport={handleImport}
               onReset={handleReset}

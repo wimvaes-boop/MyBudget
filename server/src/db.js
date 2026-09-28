@@ -14,6 +14,7 @@ const DEFAULT_DATA = {
     currencySymbol: '€',
     locale: 'nl-BE',
     salaryDay: 25, // Salaris valt meestal rond de 25e
+    periodType: 'salary_cycle',
     pinCode: '', // Leeg = geen pin ingesteld
     pinEnabled: false,
     wizardCompleted: false,
@@ -150,6 +151,12 @@ export const db = {
     state.categories = state.categories.filter(c => c.id !== id);
     saveDb(state);
     return true;
+  },
+  saveCategories: (categories) => {
+    const state = getDb();
+    state.categories = categories;
+    saveDb(state);
+    return state.categories;
   },
 
   getTransactions: () => getDb().transactions,

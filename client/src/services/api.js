@@ -12,6 +12,7 @@ const DEFAULT_LOCAL_STATE = {
     currencySymbol: '€',
     locale: 'nl-BE',
     salaryDay: 25,
+    periodType: 'salary_cycle',
     pinCode: '',
     pinEnabled: false,
     wizardCompleted: false,
@@ -569,8 +570,115 @@ export const api = {
       }
     }
 
+    // Auto-fill smart budgets if requested
+    if (payload.autoFillSmartBudgets) {
+      const inc = Number(payload.income || 0) || 2400;
+      const smartBudgets = {
+        exp_housing: Math.round(inc * 0.33),
+        exp_energy: Math.round(inc * 0.06),
+        exp_water: Math.round(inc * 0.015),
+        exp_insurance: Math.round(inc * 0.035),
+        exp_telecom: Math.round(inc * 0.025),
+        exp_tax: Math.round(inc * 0.025),
+        exp_groceries: Math.round(inc * 0.14),
+        exp_transport: Math.round(inc * 0.06),
+        exp_health: Math.round(inc * 0.02),
+        exp_dining: Math.round(inc * 0.045),
+        exp_clothing: Math.round(inc * 0.03),
+        exp_leisure: Math.round(inc * 0.035),
+        exp_travel: Math.round(inc * 0.045),
+        exp_subscriptions: 35,
+        exp_other_var: Math.round(inc * 0.02),
+        sav_emergency: Math.round(inc * 0.08),
+        sav_invest: Math.round(inc * 0.05),
+        sav_pension: 85
+      };
+      state.categories.forEach(cat => {
+        // Only set if category doesn't already have a budget set by fixedCosts or user
+        if ((!cat.budget || cat.budget === 0) && smartBudgets[cat.id] !== undefined) {
+          cat.budget = smartBudgets[cat.id];
+        }
+      });
+    }
+
     saveLocalState(state);
     return { success: true, settings: state.settings };
+  },
+
+  async fillSmartBudgets(income) {
+    if (!useLocalMode) {
+      try {
+        const res = await fetch(`${API_BASE}/categories/smart-fill`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ income })
+        });
+        if (res.ok) return await res.json();
+      } catch (e) {
+        useLocalMode = true;
+      }
+    }
+    const state = getLocalState();
+    const effectiveIncome = Number(income) || Number(state.settings?.monthlyNetIncome) || 2400;
+    const smartBudgets = {
+      exp_housing: Math.round(effectiveIncome * 0.33),
+      exp_energy: Math.round(effectiveIncome * 0.06),
+      exp_water: Math.round(effectiveIncome * 0.015),
+      exp_insurance: Math.round(effectiveIncome * 0.035),
+      exp_telecom: Math.round(effectiveIncome * 0.025),
+      exp_tax: Math.round(effectiveIncome * 0.025),
+      exp_groceries: Math.round(effectiveIncome * 0.14),
+      exp_transport: Math.round(effectiveIncome * 0.06),
+      exp_health: Math.round(effectiveIncome * 0.02),
+      exp_dining: Math.round(effectiveIncome * 0.045),
+      exp_clothing: Math.round(effectiveIncome * 0.03),
+      exp_leisure: Math.round(effectiveIncome * 0.035),
+      exp_travel: Math.round(effectiveIncome * 0.045),
+      exp_subscriptions: 35,
+      exp_other_var: Math.round(effectiveIncome * 0.02),
+      sav_emergency: Math.round(effectiveIncome * 0.08),
+      sav_invest: Math.round(effectiveIncome * 0.05),
+      sav_pension: 85
+    };
+    (state.categories || []).forEach(cat => {
+      if (smartBudgets[cat.id] !== undefined) {
+        cat.budget = smartBudgets[cat.id];
+      }
+    });
+    saveLocalState(state);
+    return { success: true, categories: state.categories };
+  },
+
+  async exportData() {
+    if (!useLocalMode) {
+      try {
+        const res = await fetch(`${API_BASE}/export`);
+        if (res.ok) return await res.json();
+      } catch (e) {
+        useLocalMode = true;
+      }
+    }
+    return getLocalState();
+  },
+
+  async importData(importedData) {
+    if (!useLocalMode) {
+      try {
+        const res = await fetch(`${API_BASE}/import`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(importedData)
+        });
+        if (res.ok) return await res.json();
+      } catch (e) {
+        useLocalMode = true;
+      }
+    }
+    if (!importedData.categories || !importedData.settings) {
+      throw new Error('Ongeldig backup bestand.');
+    }
+    saveLocalState(importedData);
+    return { success: true, message: 'Data succesvol hersteld!' };
   },
 
   async resetData() {

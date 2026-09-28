@@ -1,6 +1,6 @@
 {
   "name": "mybudget",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "MyBudget - Financiële Adviseur & Budget WebApp voor iPhone & NUC",
   "scripts": {
     "build": "npm --prefix client run build",

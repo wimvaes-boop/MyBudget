@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Calendar, Check, X, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { formatCurrency } from '../services/formatters';
+import { FREQUENCIES, getMonthlyEquivalent, formatFrequencyLabel, formatCurrency } from '../services/formatters';
 
 export default function RecurringManager({ recurring = [], categories = [], onAdd, onDelete }) {
   const [isAdding, setIsAdding] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
+  const [frequency, setFrequency] = useState('monthly');
   const [type, setType] = useState('expense');
   const [categoryId, setCategoryId] = useState('');
   const [dayOfMonth, setDayOfMonth] = useState(1);
@@ -18,6 +19,7 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
     await onAdd({
       title: title.trim(),
       amount: parseFloat(amount),
+      frequency,
       type,
       categoryId: categoryId || availableCategories[0]?.id,
       dayOfMonth: parseInt(dayOfMonth) || 1,
@@ -25,6 +27,7 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
     });
     setTitle('');
     setAmount('');
+    setFrequency('monthly');
     setIsAdding(false);
   };
 
@@ -33,7 +36,7 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-bold text-slate-900">Vaste Lasten & Terugkerend</h3>
-          <p className="text-xs text-slate-500">Automatische maandelijkse posten</p>
+          <p className="text-xs text-slate-500">Automatische maandelijkse of periodieke facturen</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
@@ -47,7 +50,7 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
       {isAdding && (
         <form onSubmit={handleSave} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-4 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-700">Nieuwe vaste post toevoegen</span>
+            <span className="text-xs font-bold text-slate-700">Nieuwe periodieke post toevoegen</span>
             <button type="button" onClick={() => setIsAdding(false)} className="text-slate-400 hover:text-slate-600">
               <X className="w-4 h-4" />
             </button>
@@ -77,7 +80,7 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
           <div className="grid grid-cols-2 gap-2">
             <input
               type="text"
-              placeholder="Titel (bv. Huur, Spotify)"
+              placeholder="Titel (bv. Belasting, Auto, Spotify)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl"
@@ -85,8 +88,8 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
             />
             <input
               type="number"
-              step="0.01"
-              placeholder="Bedrag (€)"
+              step="any"
+              placeholder="Factuurbedrag (€)"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl"
@@ -95,27 +98,56 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="px-2 py-1.5 text-xs bg-white border border-slate-200 rounded-xl"
-            >
-              {availableCategories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <div className="flex items-center gap-1.5 text-xs bg-white px-2 py-1.5 border border-slate-200 rounded-xl">
-              <span className="text-slate-400">Dag:</span>
-              <input
-                type="number"
-                min="1"
-                max="31"
-                value={dayOfMonth}
-                onChange={(e) => setDayOfMonth(e.target.value)}
-                className="w-10 text-xs font-bold"
-              />
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-1">Categorie</label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded-xl"
+              >
+                {availableCategories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-1">Dag in de maand</label>
+              <div className="flex items-center gap-1.5 text-xs bg-white px-2 py-1.5 border border-slate-200 rounded-xl">
+                <span className="text-slate-400">Dag:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(e.target.value)}
+                  className="w-full text-xs font-bold"
+                />
+              </div>
             </div>
           </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-slate-500 block mb-1">Frequentie / Betalingstermijn</label>
+            <select
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+              className="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded-xl"
+            >
+              {FREQUENCIES.map(f => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {frequency !== 'monthly' && amount && (
+            <div className="p-2.5 bg-emerald-50 rounded-xl text-xs text-emerald-800 flex justify-between items-center border border-emerald-100">
+              <span>Maandelijkse reservering:</span>
+              <span className="font-bold text-emerald-900">
+                {formatCurrency(getMonthlyEquivalent(parseFloat(amount) || 0, frequency))} / maand
+              </span>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -138,16 +170,30 @@ export default function RecurringManager({ recurring = [], categories = [], onAd
               </div>
               <div>
                 <span className="text-xs font-bold text-slate-800 block">{item.title}</span>
-                <span className="text-[10px] text-slate-400">Dag {item.dayOfMonth} van de maand</span>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                  <span>Dag {item.dayOfMonth}</span>
+                  {item.frequency && item.frequency !== 'monthly' && (
+                    <span className="bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-medium">
+                      {formatFrequencyLabel(item.frequency)}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className={`text-xs font-bold ${
-                item.type === 'income' ? 'text-emerald-600' : 'text-slate-900'
-              }`}>
-                {formatCurrency(item.amount)}
-              </span>
+              <div className="text-right">
+                <span className={`text-xs font-bold block ${
+                  item.type === 'income' ? 'text-emerald-600' : 'text-slate-900'
+                }`}>
+                  {formatCurrency(item.amount)}
+                </span>
+                {item.frequency && item.frequency !== 'monthly' && (
+                  <span className="text-[10px] text-slate-400 block font-medium">
+                    ({formatCurrency(getMonthlyEquivalent(item.amount, item.frequency))}/mnd)
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => onDelete(item.id)}
                 className="p-1 text-slate-300 hover:text-rose-500 transition-colors"

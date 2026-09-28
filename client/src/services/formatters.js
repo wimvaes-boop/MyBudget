@@ -39,3 +39,23 @@ export function getIconComponent(iconName) {
   // Safe fallback if icon string is passed
   return iconName || 'Tag';
 }
+
+export const FREQUENCIES = [
+  { id: 'monthly', label: 'Maandelijks (12x/jaar)', divisor: 1, short: '/mnd' },
+  { id: 'quarterly', label: 'Per 3 maanden (Trimester / Kwartaal)', divisor: 3, short: '/3 mnd' },
+  { id: 'quadrimestral', label: 'Per 4 maanden (3x/jaar)', divisor: 4, short: '/4 mnd' },
+  { id: 'semiannual', label: 'Per halfjaar (6 maanden)', divisor: 6, short: '/halfjaar' },
+  { id: 'yearly', label: 'Per jaar (Jaarlijks)', divisor: 12, short: '/jaar' }
+];
+
+export function getMonthlyEquivalent(amount, frequency = 'monthly') {
+  const num = Number(amount) || 0;
+  const f = FREQUENCIES.find(x => x.id === frequency);
+  const div = f ? f.divisor : 1;
+  return Math.round((num / div) * 100) / 100;
+}
+
+export function formatFrequencyLabel(frequency = 'monthly') {
+  const f = FREQUENCIES.find(x => x.id === frequency);
+  return f ? f.short : '/mnd';
+}

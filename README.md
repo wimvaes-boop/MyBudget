@@ -1,4 +1,4 @@
-# 💎 MyBudget (v1.2.0) • Financiële Adviseur & Budget WebApp
+# 💎 MyBudget (v1.3.0) • Financiële Adviseur & Budget WebApp
 
 Een high-end persoonlijke budgetbeheerder en financieel adviseur, ontworpen om te draaien op je **NUC** thuisserver en te bedienen vanaf je **iPhone** (via Tailscale of lokaal netwerk) én online beschikbaar als standalone WebApp via GitHub Pages.
 
@@ -18,26 +18,30 @@ Een high-end persoonlijke budgetbeheerder en financieel adviseur, ontworpen om t
 
 ---
 
-## 📱 Belangrijkste Functies
+## 📱 Belangrijkste Functies in v1.3.0
 
-1. **📷 Automatische Kassaticket Scanner (OCR):**
+1. **🔄 Flexibele Budgetperiodes (Salariscyclus vs Kalendermaand):**
+   - **Salariscyclus:** Telt je periode af tussen twee salarisstortingen (bv. van de 25e tot de 24e van de volgende maand). Reset automatisch op je salarisdag!
+   - **Kalendermaand:** Eenvoudig omschakelen naar strikte kalendermaanden (1e t/m 31e).
+
+2. **📆 Flexibele Factuurtermijnen (Jaar, Kwartaal / 3 mnd, 4 mnd, Halfjaar):**
+   - Stel belastingen, heffingen of verzekeringen in per jaar, kwartaal of halfjaar.
+   - De adviseur berekent automatisch de maandelijkse reservering zodat je dagbudget exact klopt.
+
+3. **🪄 Slimme Richtbudgetten (50/30/20):**
+   - Met 1 klik richtbudgetten invullen voor alle categorieën op basis van je netto inkomen.
+   - Nooit meer handmatig 20 categorieën op 0 moeten laten staan.
+
+4. **📷 Automatische Kassaticket Scanner (OCR):**
    - Maak een foto van een kassabonnetje met je mobiele camera.
-   - Herkent automatisch het **totaalbedrag**, de **winkel** (Delhaize, Colruyt, Albert Heijn, Lidl, Kruidvat, Shell, etc.) en de **datum**.
-   - Koppelt het ticket automatisch aan de juiste categorie en betaalmethode (inclusief maaltijdcheques).
-   - 100% lokaal en privé op je toestel verwerkt (`tesseract.js`).
+   - Herkent automatisch bedrag, winkel en datum. 100% lokaal en privé (`tesseract.js`).
 
-2. **Duidelijk Dagbudget & Vandaag Uitgegeven:**
-   - **Dagbudget:** Het bedrag dat je vandaag zorgeloos kunt besteden aan wensen en dagelijkse kosten.
-   - **Vandaag uitgegeven:** Toont exact wat je vandaag hebt uitgegeven en wat er nog overschiet van je dagbudget.
-   - **Tempo tot salaris:** Volgt het aantal dagen tot je volgende salarisuitbetaling.
+5. **Duidelijk Dagbudget & Vandaag Uitgegeven:**
+   - Toont direct: dagbudget, vandaag uitgegeven, wat er nog overschiet en dagen tot volgend salaris.
 
-3. **Logische & Rustige Categorie-Indeling:**
-   - *Dagelijkse & Populaire Uitgaven* (boodschappen, horeca, vervoer) direct bovenaan.
-   - *Vaste Maandlasten* (hypotheek/huur, energie, verzekeringen) rustig onderaan met `✓ Betaald / Voldaan` status zonder storende alarmen.
-
-4. **Variabele Inkomsten:**
-   - Eenvoudig extra inkomsten registreren (verkoop van tekeningen/kunst, opdrachten, workshops, bonussen).
-   - Verhoogt direct je veilige bestedingsruimte voor de rest van de maand.
+6. **Pincode & 1-Klik Data Backups:**
+   - Optionele 4-cijferige pincodebeveiliging.
+   - 1-klik directe JSON backup downloaden of herstellen (werkt op elk apparaat en GitHub Pages).
 
 5. **50 / 30 / 20 Financieel Advies:**
    - Meet of je uitgaven in balans zijn (50% behoeften, 30% wensen, 20% sparen & beleggen).

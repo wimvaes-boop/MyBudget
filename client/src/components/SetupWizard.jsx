@@ -15,7 +15,8 @@ export default function SetupWizard({ onComplete, onClose }) {
       exp_telecom: ''
     },
     savingsGoalMonthly: '',
-    pinCode: ''
+    pinCode: '',
+    autoFillSmartBudgets: true
   });
 
   const totalFixed = Object.values(formData.fixedCosts).reduce((a, b) => Number(a || 0) + Number(b || 0), 0);
@@ -41,7 +42,8 @@ export default function SetupWizard({ onComplete, onClose }) {
         Object.entries(formData.fixedCosts).map(([k, v]) => [k, Number(v || 0)])
       ),
       savingsGoalMonthly: Number(formData.savingsGoalMonthly || 0),
-      pinCode: formData.pinCode
+      pinCode: formData.pinCode,
+      autoFillSmartBudgets: formData.autoFillSmartBudgets
     });
   };
 
@@ -313,6 +315,26 @@ export default function SetupWizard({ onComplete, onClose }) {
                   onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
                   className="w-full text-base tracking-widest font-mono text-slate-900 bg-white px-3 py-2 border border-slate-200 rounded-xl focus:outline-emerald-500 placeholder:tracking-normal placeholder:font-sans placeholder:text-xs placeholder:text-slate-400"
                 />
+              </div>
+
+              {/* Optie voor automatische richtbudgetten */}
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.autoFillSmartBudgets}
+                    onChange={(e) => setFormData({ ...formData, autoFillSmartBudgets: e.target.checked })}
+                    className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">
+                      🪄 Slimme richtbudgetten invullen (Aanbevolen)
+                    </span>
+                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
+                      Vult automatisch evenwichtige bedragen in voor o.a. Boodschappen, Vervoer, Horeca en Vrije Tijd op basis van 50/30/20.
+                    </span>
+                  </div>
+                </label>
               </div>
 
               {/* Samenvatting van de Adviseur */}

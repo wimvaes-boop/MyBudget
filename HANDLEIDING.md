@@ -1,6 +1,6 @@
 # 📘 MyBudget — Gebruikershandleiding
 
-Welkom bij **MyBudget** (v1.2.0), jouw persoonlijke en privacy-vriendelijke financiële assistent. Deze handleiding legt stap voor stap uit hoe je het maximale uit de app haalt op je iPhone, pc of NUC.
+Welkom bij **MyBudget** (v1.3.0), jouw persoonlijke en privacy-vriendelijke financiële assistent. Deze handleiding legt stap voor stap uit hoe je het maximale uit de app haalt op je iPhone, pc of NUC.
 
 ---
 
@@ -163,22 +163,35 @@ Tik onderaan op het tabblad **'Advies'** om dieper inzicht te krijgen:
 
 Tik onderaan op **'Instellingen'**:
 
-* **Basisgegevens:** Pas je netto maandloon, maaltijdcheques of salarisdag aan.
-* **Categoriebudgetten Aanpassen:** Tik op een categorie om het richtbudget per maand te verhogen of te verlagen.
-* **Pincode Beveiliging:** Schakel een 4-cijferige pincode in. Zodra je de app verlaat en terugkeert, vraagt MyBudget netjes om je code.
-* **Backup Downloaden:** Download een `.json` bestand met al je transacties, categorieën en instellingen.
+* **Budgetperiode Berekening (Salariscyclus vs Kalendermaand):**
+  * **Salariscyclus (Aanbevolen):** De app telt je periode af tussen twee salarisstortingen (bv. van de 25e tot de 24e van de volgende maand). Zodra je salarisdag aanbreekt, herstart de teller automatisch en krijg je een nieuw vers dagbudget.
+  * **Kalendermaand:** Je periode loopt strikt van de 1e t/m de laatste dag van de maand.
+* **🪄 Slimme Richtbudgetten Invullen:**
+  * Waren je budgetten blanco na de setup? Met één klik op deze knop berekent MyBudget direct evenwichtige richtbedragen voor al je variabele categorieën (boodschappen, horeca, vervoer, etc.) volgens de 50/30/20 regel op basis van je netto inkomsten.
+* **Factuurfrequenties (Jaarlijks, Kwartaal, etc.):**
+  * Tik op een categorie (zoals Belastingen of Verzekeringen) of voeg een vaste last toe.
+  * Kies de termijn: **Maandelijks**, **Per 3 maanden (Kwartaal / Trimester)**, **Per 4 maanden**, **Per halfjaar (6 mnd)** of **Per jaar**.
+  * MyBudget berekent automatisch de maandelijkse reservering (`bv. € 600 / jaar = € 50 / mnd`), zodat je dagbudget altijd klopt en je nooit verrast wordt door een periodieke factuur.
+* **Pincode Beveiliging:** Schakel een 4-cijferige pincode in. Zodra je de app verlaat en terugkeert, vraagt MyBudget om je code.
+* **1-Klik Backup Downloaden:** Sla direct een `.json` bestand op je iPhone of computer op zonder dat er een pagina opent. Werkt 100% lokaal en betrouwbaar.
 * **Backup Herstellen:** Upload een eerder gedownload `.json` bestand om je gegevens op elk moment terug te zetten.
-* **Start Wizard Opnieuw:** Doorloop de configuratiewizard opnieuw om je basisbedragen aan te passen.
+* **Start Wizard Opnieuw / Data wissen:** Doorloop de configuratiewizard opnieuw of wis alles voor een blanco lei.
 
 ---
 
 ## 11. Veelgestelde Vragen (FAQ)
 
+### Hoe werkt het resetten van de periode?
+Je periode hoef je niet handmatig te resetten! In de modus **Salariscyclus** (standaard) reset je cyclus automatisch op jouw ingestelde salarisdag (bv. de 25e van de maand). Alle tellers voor het dagbudget en de maanduitgaven beginnen dan direct fris aan de nieuwe cyclus.
+
+### Hoe stel ik gemeentebelasting of autoverzekering per kwartaal of per jaar in?
+Ga naar *Instellingen* of *Vaste Lasten & Terugkerend*. Tik op de post (bv. *Belastingen & Heffingen*), kies bij termijn voor *Per jaar* of *Per 3 maanden (Kwartaal)* en vul het factuurbedrag in. MyBudget reserveert maandelijks automatisch het juiste deel.
+
 ### Waarom zie ik bij mijn hypotheek geen waarschuwingskleuren als het budget bereikt is?
 Omdat een hypotheek of vaste huur een vaste maandlast is die je eenmalig per maand betaalt. Het is volstrekt normaal dat 100% hiervan bereikt is. MyBudget toont daarom rustig `✓ Betaald / Voldaan` in plaats van een waarschuwing.
 
 ### Wat als ik de app op een andere iPhone wil gebruiken?
-Stuur de GitHub link (`https://wimvaes-boop.github.io/MyBudget/`) door. Die persoon opent de link, doorloopt de blanco wizard met zijn/haar eigen cijfers, en heeft een 100% privé eigen budgetapp op zijn telefoon.
+Stuur de link (`https://wimvaes-boop.github.io/MyBudget/`) door. Die persoon opent de link, doorloopt de blanco wizard met zijn/haar eigen cijfers, en heeft een 100% privé eigen budgetapp op zijn telefoon.
 
 ### Hoe reset ik alles naar een schone lei?
 Ga naar *Instellingen* → scrol naar beneden → tik op *'Data wissen / Resetten'*. Alles wordt gewist en de wizard start weer blanco op 0.
