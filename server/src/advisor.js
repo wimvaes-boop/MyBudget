@@ -204,9 +204,43 @@ export function analyzeFinances() {
   };
 
   // Housing budget reservation (woonbudget aftrekken bij begin van de maand)
-  const housingCat = categories.find(c => c.id === 'exp_housing');
-  const housingBudget = Number(housingCat?.budget || 0);
-  const actualHousingSpent = Number(categorySpending['exp_housing'] || 0);
+  const housingCats = categories.filter(c => 
+    c.id === 'exp_housing' || 
+    (c.id && c.id.toLowerCase().includes('housing')) ||
+    (c.name && (
+      c.name.toLowerCase().includes('wonen') || 
+      c.name.toLowerCase().includes('huur') || 
+      c.name.toLowerCase().includes('hypotheek')
+    ))
+  );
+
+  let housingBudget = housingCats.reduce((sum, c) => sum + (Number(c.budget) || 0), 0);
+  
+  // If no category budget was set or if recurring is higher, check recurring items
+  const housingRecs = (recurring || []).filter(r => 
+    r.categoryId === 'exp_housing' || 
+    r.id === 'rec_mortgage' || 
+    (r.title && (
+      r.title.toLowerCase().includes('woon') || 
+      r.title.toLowerCase().includes('huur') || 
+      r.title.toLowerCase().includes('hypotheek') || 
+      r.title.toLowerCase().includes('mortgage')
+    ))
+  );
+  const recHousingTotal = housingRecs.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  if (recHousingTotal > housingBudget) {
+    housingBudget = recHousingTotal;
+  }
+
+  // Calculate actual spending on housing this month
+  let actualHousingSpent = 0;
+  housingCats.forEach(c => {
+    actualHousingSpent += Number(categorySpending[c.id] || 0);
+  });
+  if (actualHousingSpent === 0 && categorySpending['exp_housing']) {
+    actualHousingSpent = Number(categorySpending['exp_housing'] || 0);
+  }
+
   const unpaidHousingBudget = Math.max(0, housingBudget - actualHousingSpent);
 
   // Remaining budget: effective income minus actual expenses and unpaid housing reservation

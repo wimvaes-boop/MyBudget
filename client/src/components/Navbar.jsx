@@ -25,9 +25,14 @@ export default function Navbar({ advisorData, settings, onLock, onRefresh, isRef
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-900 tracking-tight text-base">MyBudget</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-xs">
-                v1.3.0
-              </span>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-xs cursor-pointer active:scale-95 transition-transform"
+                title="Tik om app te herladen"
+              >
+                v1.3.1
+              </button>
               <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-0.5">
                 <Sparkles className="w-2.5 h-2.5" /> Adviseur
               </span>

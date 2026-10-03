@@ -65,7 +65,7 @@ export default function App() {
 
   const handleRefresh = () => {
     setIsRefreshing(true);
-    loadData();
+    window.location.reload();
   };
 
   const handleUnlock = () => {
@@ -297,9 +297,17 @@ export default function App() {
                   <span className="text-sm sm:text-base font-black text-slate-900 block mt-0.5">
                     {formatCurrency(advisor?.summary?.remainingBudget !== undefined ? advisor.summary.remainingBudget : Math.max(0, (advisor?.summary?.effectiveIncome || 0) - (advisor?.summary?.actualExpenses || 0)), false)}
                   </span>
-                  {advisor?.summary?.unpaidHousingBudget > 0 && (
+                  {advisor?.summary?.unpaidHousingBudget > 0 ? (
+                    <span className="text-[9px] font-semibold text-emerald-700 block mt-0.5 leading-tight">
+                      -€ {Math.round(advisor.summary.unpaidHousingBudget)} woonbudget
+                    </span>
+                  ) : advisor?.summary?.housingBudget > 0 ? (
                     <span className="text-[9px] font-semibold text-slate-400 block mt-0.5 leading-tight">
-                      na woonbudget
+                      woonkost voldaan
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-medium text-slate-400 block mt-0.5 leading-tight">
+                      vrij saldo
                     </span>
                   )}
                 </div>
