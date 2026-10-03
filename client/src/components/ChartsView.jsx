@@ -45,7 +45,7 @@ export default function ChartsView({ advisorData }) {
   const cashflowData = [
     { name: 'Inkomsten', bedrag: summary?.effectiveIncome || 0, fill: '#10b981' },
     { name: 'Uitgaven', bedrag: summary?.actualExpenses || summary?.budgetedExpenses || 0, fill: '#ef4444' },
-    { name: 'Vrij / Sparen', bedrag: Math.max(0, (summary?.effectiveIncome || 0) - (summary?.actualExpenses || 0)), fill: '#3b82f6' }
+    { name: 'Vrij / Sparen', bedrag: summary?.remainingBudget !== undefined ? summary.remainingBudget : Math.max(0, (summary?.effectiveIncome || 0) - (summary?.actualExpenses || 0)), fill: '#3b82f6' }
   ];
 
   const totalSpent = expenseData.reduce((acc, cur) => acc + (cur.spent || 0), 0);

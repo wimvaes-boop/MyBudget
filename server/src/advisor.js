@@ -203,6 +203,15 @@ export function analyzeFinances() {
     }
   };
 
+  // Housing budget reservation (woonbudget aftrekken bij begin van de maand)
+  const housingCat = categories.find(c => c.id === 'exp_housing');
+  const housingBudget = Number(housingCat?.budget || 0);
+  const actualHousingSpent = Number(categorySpending['exp_housing'] || 0);
+  const unpaidHousingBudget = Math.max(0, housingBudget - actualHousingSpent);
+
+  // Remaining budget: effective income minus actual expenses and unpaid housing reservation
+  const remainingBudget = Math.max(0, effectiveMonthlyIncome - totalActualExpenses - unpaidHousingBudget);
+
   // Safe to Spend Daily calculation
   // Remaining available budget for the rest of the month divided by days left until salary
   const totalVariableBudget = wantsBudget + (categories.find(c => c.id === 'exp_groceries')?.budget || 400);
@@ -426,6 +435,10 @@ export function analyzeFinances() {
       effectiveIncome: effectiveMonthlyIncome,
       actualIncome: totalActualIncome,
       actualExpenses: totalActualExpenses,
+      remainingBudget,
+      housingBudget,
+      actualHousingSpent,
+      unpaidHousingBudget,
       netSavingsCurrentMonth: totalActualIncome - totalActualExpenses,
       budgetedIncome: totalBudgetedIncome,
       budgetedExpenses: totalBudgetedExpenses,

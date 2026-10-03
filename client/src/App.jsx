@@ -295,8 +295,13 @@ export default function App() {
                 <div className="p-3 bg-slate-100/80 rounded-2xl border border-slate-200/80">
                   <span className="text-[10px] font-bold text-slate-700 uppercase block">Resterend</span>
                   <span className="text-sm sm:text-base font-black text-slate-900 block mt-0.5">
-                    {formatCurrency(Math.max(0, (advisor?.summary?.effectiveIncome || 0) - (advisor?.summary?.actualExpenses || 0)), false)}
+                    {formatCurrency(advisor?.summary?.remainingBudget !== undefined ? advisor.summary.remainingBudget : Math.max(0, (advisor?.summary?.effectiveIncome || 0) - (advisor?.summary?.actualExpenses || 0)), false)}
                   </span>
+                  {advisor?.summary?.unpaidHousingBudget > 0 && (
+                    <span className="text-[9px] font-semibold text-slate-400 block mt-0.5 leading-tight">
+                      na woonbudget
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
